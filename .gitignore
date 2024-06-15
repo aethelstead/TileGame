@@ -1,5 +1,6 @@
 # Mine
 assets/
+*.Identifier
 
 ##### Windows
 # Windows thumbnail cache files
