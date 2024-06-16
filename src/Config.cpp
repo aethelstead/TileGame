@@ -56,6 +56,12 @@ bool Config::LoadFromIni(const std::string& iniPath)
         this->windowHeight = std::atoi(propVal.c_str());
     }
 
+    if (auto propVal = GetPropertyValue("windowFullscreen", props); !propVal.empty())
+    {
+        LOGDEBUG("Config::LoadFromIni() - Applying config property: 'windowFullscreen', from " << iniPath);
+        this->windowFullscreen = (propVal == "true" ? true : false);
+    }
+
     if (auto propVal = GetPropertyValue("initMapName", props); !propVal.empty())
     {
         LOGDEBUG("Config::LoadFromIni() - Applying config property: 'initMapName', from " << iniPath);

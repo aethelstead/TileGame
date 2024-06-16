@@ -11,6 +11,7 @@ namespace Gin
         std::string windowTitle;
         uint windowWidth = 0;
         uint windowHeight = 0;
+        bool windowFullscreen;
         std::string initMapName;
 
         bool LoadFromIni(const std::string& iniPath);
@@ -19,8 +20,9 @@ namespace Gin
     inline Config DEFAULT_CONFIG = 
     { 
         .windowTitle = "TileGame",
-        .windowWidth = 640,
-        .windowHeight = 480,
+        .windowWidth = 1280,
+        .windowHeight = 800,
+        .windowFullscreen = false,
         .initMapName = "overworld"
     };
 }

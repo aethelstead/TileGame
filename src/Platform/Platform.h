@@ -32,7 +32,7 @@ namespace Gin::Platform
     void Sleep(uint ms);
 
     // Window
-    Window* CreateWindow(const char* title, uint width, uint height, bool resizeable = false);
+    Window* CreateWindow(const char* title, uint width, uint height, bool fullscreen = false);
     void DestroyWindow(Window* pWindow);
     void GetWindowSize(Window* pWindow, int& x, int& y);
 

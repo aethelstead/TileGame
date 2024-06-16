@@ -2,9 +2,9 @@
 
 using namespace Gin;
 
-std::unique_ptr<Window> Window::Create(const std::string& title, uint width, uint height)
+std::unique_ptr<Window> Window::Create(const std::string& title, uint width, uint height, bool fullscreen)
 {
-    auto pInternalWindow = Platform::CreateWindow(title.c_str(), width, height);
+    auto pInternalWindow = Platform::CreateWindow(title.c_str(), width, height, fullscreen);
     if (!pInternalWindow)
         return nullptr;
 

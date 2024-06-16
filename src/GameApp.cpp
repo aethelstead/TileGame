@@ -38,7 +38,7 @@ bool GameApp::Init()
         }
         LOGINFO("Game::Init() - Platform initialised.");
 
-        m_pWindow = Window::Create(config.windowTitle.c_str(), config.windowWidth, config.windowHeight);
+        m_pWindow = Window::Create(config.windowTitle.c_str(), config.windowWidth, config.windowHeight, config.windowFullscreen);
         if (!m_pWindow)
         {
             LOGERROR("Game::Init() - Failed to create platform window.");
@@ -107,14 +107,6 @@ bool GameApp::Init()
     m_savedState = m_state;
 
     LOGINFO("Game::Init() - Initialisation successful.");
-
-    {
-        const auto& tileset = m_state.worldMap.m_tilesetMap[m_state.m_pPlayer->tilesetId];
-        for (const auto& [tileId, animation] : tileset.animationsMap)
-        {
-            LOGDEBUG(tileId << ": " << animation.frames.size());
-        }
-    }
 
     return true;
 }

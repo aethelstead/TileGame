@@ -227,8 +227,8 @@ void GameState::UpdateWorldTilesInView()
     bool scrollsY = (camera.height < (worldMap.m_tilemap.mapHeight * worldMap.m_tilemap.m_tileHeight));
 
     // +1 extra tile X & Y ways for rendering purposes.
-    uint64_t maxTilesInViewX = (scrollsX) ? (camera.width / worldMap.m_tilemap.m_tileWidth) + 1 : worldMap.m_tilemap.mapWidth;
-    uint64_t maxTilesInViewY = (scrollsY) ? (camera.height / worldMap.m_tilemap.m_tileHeight) + 1 : worldMap.m_tilemap.mapHeight;
+    uint64_t maxTilesInViewX = (scrollsX) ? (camera.width / worldMap.m_tilemap.m_tileWidth) + 2 : worldMap.m_tilemap.mapWidth;
+    uint64_t maxTilesInViewY = (scrollsY) ? (camera.height / worldMap.m_tilemap.m_tileHeight) + 2 : worldMap.m_tilemap.mapHeight;
 
     uint64_t startX = (camera.pos.x / worldMap.m_tilemap.m_tileWidth);
     uint64_t startY = (camera.pos.y / worldMap.m_tilemap.m_tileHeight);

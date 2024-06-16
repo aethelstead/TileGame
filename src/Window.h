@@ -11,7 +11,7 @@ namespace Gin
     class Window
     {
     public:
-        static std::unique_ptr<Window> Create(const std::string& title, uint width, uint height);
+        static std::unique_ptr<Window> Create(const std::string& title, uint width, uint height, bool fullscreen);
 
     private:
         Platform::Window* m_pInternalWindow = nullptr;

@@ -35,7 +35,7 @@ namespace Gin
         {
             Entity::FromProto(proto);
             type = EntityType::Player;
-            speed = 3;
+            speed = 2;
             animId = static_cast<uint>(PlayerAnimationType::IdleSouth);
             ready = true;
         }
