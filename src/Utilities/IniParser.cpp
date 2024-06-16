@@ -17,7 +17,7 @@ std::map<std::string, std::string> IniParser::Parse(const std::string& rawText)
         lines.push_back(line);
 
     std::map<std::string, std::string> iniProps;
-    for (const auto& line : lines)
+    for (auto& line : lines)
     {
         std::string keyText;
         std::string valueText;
@@ -34,16 +34,23 @@ std::map<std::string, std::string> IniParser::Parse(const std::string& rawText)
     return iniProps;
 }
 
-bool IniParser::ParseProperty(const std::string& rawText, std::string& keyText, std::string& valueText)
+bool IniParser::ParseProperty(std::string& rawLine, std::string& keyText, std::string& valueText)
 {
+    // Ignore comments (Anything after ';' for the rest of the line)
+    auto semicolonIdx = rawLine.find(";");
+    if (semicolonIdx != rawLine.npos)
+    {
+        rawLine = rawLine.substr(0, semicolonIdx);
+    }
+
     // Find the index of the equals symbol in the text. Refuse to parse if not found.
-    auto equalsSymbolIdx = rawText.find("=");
-    if (equalsSymbolIdx == rawText.npos)
+    auto equalsSymbolIdx = rawLine.find("=");
+    if (equalsSymbolIdx == rawLine.npos)
         return false;
 
     // Extract the key text and value text from the raw text.
-    keyText = rawText.substr(0, equalsSymbolIdx);
-    valueText = rawText.substr(equalsSymbolIdx + 1);
+    keyText = rawLine.substr(0, equalsSymbolIdx);
+    valueText = rawLine.substr(equalsSymbolIdx + 1);
 
     return true;
 }

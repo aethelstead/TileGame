@@ -13,7 +13,7 @@ using namespace Gin;
 
 bool GameApp::Init()
 {
-    LOGINFO("Game::Init() - Initialising...");
+    LOGINFO("GameApp::Init() - Initialising...");
 
     // Load config
     Config config;
@@ -21,13 +21,17 @@ bool GameApp::Init()
         auto iniPath = "config.ini";
         if (config.LoadFromIni(iniPath))
         {
-            LOGINFO("Game::Init() - Loaded config from '" << iniPath << "'.");
+            LOGINFO("GameApp::Init() - Loaded config from '" << iniPath << "'.");
         }
         else
         {
-            LOGWARN("Game::Init() - Failed to load config from '" << iniPath << "'. Default config will be used instead.");
+            LOGWARN("GameApp::Init() - Failed to load config from '" << iniPath << "'. Default config will be used instead.");
         }
     }
+
+    m_vsync = config.vsync;
+    m_targetFPS = config.fps;
+    LOGINFO("GameApp::Init() - FPS = " << m_targetFPS << " (Will be ignored if vsync is enabled)");
 
     // Init platform, create Window and create Rendererer
     {
@@ -36,23 +40,23 @@ bool GameApp::Init()
             LOGERROR("Platform::Init() - Failed.");
             return false;
         }
-        LOGINFO("Game::Init() - Platform initialised.");
+        LOGINFO("GameApp::Init() - Platform initialised.");
 
         m_pWindow = Window::Create(config.windowTitle.c_str(), config.windowWidth, config.windowHeight, config.windowFullscreen);
         if (!m_pWindow)
         {
-            LOGERROR("Game::Init() - Failed to create platform window.");
+            LOGERROR("GameApp::Init() - Failed to create platform window.");
             return false;
         }
-        LOGINFO("Game::Init() - Created Platform Window.");
+        LOGINFO("GameApp::Init() - Created Platform Window.");
 
-        m_pRenderer = Renderer::Create(m_pWindow);
+        m_pRenderer = Renderer::Create(m_pWindow, m_vsync);
         if (!m_pRenderer)
         {
-            LOGERROR("Game::Init() - Failed to create platform renderer.");
+            LOGERROR("GameApp::Init() - Failed to create platform renderer.");
             return false;
         }
-        LOGINFO("Game::Init() - Created Platform Renderer.");
+        LOGINFO("GameApp::Init() - Created Platform Renderer.");
     }
 
     // Init text
@@ -60,11 +64,19 @@ bool GameApp::Init()
         m_pFont = Platform::OpenFont("assets/font/arial_bold.ttf", 18);
         if (!m_pFont)
         {
-            LOGWARN("Game::Init() - Failed to open font: 'assets/font/arial_bold.ttf'");
+            LOGWARN("GameApp::Init() - Failed to open font: 'assets/font/arial_bold.ttf'");
         }
     }
 
     m_viewRect = Recti(0, 0, config.windowWidth, config.windowHeight);
+
+    // Create a texture to render everything to (rendered at internal resolution then gets upscaled to display resolution)
+    m_renderTexture = Texture::Create((uint)m_viewRect.w, (uint)m_viewRect.h, m_pRenderer->GetContext());
+    if (!m_renderTexture)
+    {
+        LOGERROR("GameApp::Init() - Failed to create render texture.");
+        return false;
+    }
 
     // Init menus
     {
@@ -91,22 +103,22 @@ bool GameApp::Init()
         {
             if (!LoadGameMap(config.initMapName, worldMap))
             {
-                LOGWARN("Game::Init() - Initial game map could not be loaded.");
+                LOGWARN("GameApp::Init() - Initial game map could not be loaded.");
                 return false;
             }
         }
         else
         {
-            LOGWARN("Game::Init() - Game map not loaded because no map was specified in config.");
+            LOGWARN("GameApp::Init() - Game map not loaded because no map was specified in config.");
         }
-        LOGINFO("Game::Init() - Loaded initial game map: " << config.initMapName);
+        LOGINFO("GameApp::Init() - Loaded initial game map: " << config.initMapName);
     
         m_state.ChangeMap(worldMap);
     }
 
     m_savedState = m_state;
 
-    LOGINFO("Game::Init() - Initialisation successful.");
+    LOGINFO("GameApp::Init() - Initialisation successful.");
 
     return true;
 }
@@ -316,16 +328,16 @@ void GameApp::HandlePlatformEvents()
     //pTopMenu->HandleKeyboard(Platform::GetKeyboardState());
 }
 
-void GameApp::Update()
+void GameApp::Update(double dt)
 {
     if (!m_paused)
     {
         bool mapChange = false;
         std::string nextMapName;
         Vector2f spawnPos;
-        m_state.Update(m_rtClock, mapChange, nextMapName, spawnPos);
+        m_state.Update(dt, mapChange, nextMapName, spawnPos);
 
-        UpdateAnimations();
+        UpdateAnimations(dt);
 
         if (mapChange)
         {
@@ -341,7 +353,7 @@ void GameApp::Update()
     } 
 }
 
-void GameApp::UpdateAnimations()
+void GameApp::UpdateAnimations(double dt)
 {
     // @TODO: This seems to be updating all animations regardless of whether or not they are shown
 
@@ -352,7 +364,7 @@ void GameApp::UpdateAnimations()
         {
             const auto& currFrame = animation.frames[animation.currFrameIdx];
 
-            animation.nextFrameMs += m_rtClock.Delay();
+            animation.nextFrameMs += dt;
             
             bool frameDurationExceeded = (animation.nextFrameMs >= currFrame.duration);
             if (!frameDurationExceeded)
@@ -400,33 +412,57 @@ void GameApp::UpdateAnimations()
     }
 }
 
-void GameApp::Loop()
+void GameApp::Render()
 {
-    LOGINFO("Game::Loop() - Running...");
+    //SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), m_renderTexture->GetInternal());
+    m_pRenderer->FillRect(m_viewRect, Colour4i::Black());
+    m_gameRenderer.Render(m_pRenderer, m_state, m_textureMap);
 
-    static const uint TARGET_FPS = 60.0;
-    static const uint MAX_FRAME_TIME = 1000.0 / TARGET_FPS;
-
-    m_rtClock.Start();
-    m_running = true;
-    while (m_running)
-    {
-        HandlePlatformEvents();
-        Update();
-
-        m_pRenderer->FillRect(m_viewRect, Colour4i::Black());
-        m_gameRenderer.Render(m_pRenderer, m_state, m_textureMap);
-
+        /*
         // Render any active views
         for (const auto& pView : m_activeViews)
         {   
             pView->Render(m_pRenderer);
+        }*/
+
+        
+    //SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), nullptr);
+    //Recti dest(0, 0, 1280, 720);
+    //m_pRenderer->Copy(m_renderTexture, m_viewRect, dest);
+    m_pRenderer->Present();
+}
+
+void GameApp::Loop()
+{
+    LOGINFO("Game::Loop() - Running...");
+
+    const uint MAX_DELTA = (1000 / m_targetFPS);
+
+    double dt = 0.0;
+
+    m_running = true;
+    while (m_running)
+    {
+        uint64_t startTicks = Platform::Ticks64();
+
+        HandlePlatformEvents();
+        Update(dt);
+
+        Render();
+
+        uint64_t currTicks = Platform::Ticks64();
+        int64_t delta = (currTicks - startTicks);
+        if (delta < 0 || delta > MAX_DELTA)         // @TODO: Revise this. (Why is second condition necessary?)
+            delta = 0;
+
+        if (!m_vsync)
+        {
+            // If vsync is disabled then need to account for the game running too quick
+            delta = MAX_DELTA - delta;
+
+            Platform::Sleep(delta);
         }
 
-        m_pRenderer->Present();
-
-        m_rtClock.Update();
-
-        Platform::Sleep(m_rtClock.Delay());
+        dt = delta;
     }
 }

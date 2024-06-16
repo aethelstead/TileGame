@@ -12,6 +12,8 @@ namespace Gin
     class Texture
     {
     public:
+        static std::unique_ptr<Texture> Create(uint width, uint height, const std::unique_ptr<RenderContext>& pRenderer);
+
         static std::unique_ptr<Texture> Create(const std::string& filepath, const std::unique_ptr<RenderContext>& pRenderer);
 
         static std::unique_ptr<Texture> Create(Platform::Surface* pSurface, const std::unique_ptr<RenderContext>& pRenderer);

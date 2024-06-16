@@ -2,12 +2,22 @@
 
 using namespace Gin;
 
+std::unique_ptr<Texture> Texture::Create(uint width, uint height, const std::unique_ptr<RenderContext>& pRenderer)
+{
+    auto pInternalTexture = Platform::CreateTexture(width, height, RenderContext::s_pixelFormat, pRenderer->GetInternal());
+    if (!pInternalTexture)
+        return nullptr;
+
+    auto pTexture = std::make_unique<Texture>(pInternalTexture);
+    return pTexture;
+}
+
 std::unique_ptr<Texture> Texture::Create(const std::string& filepath, const std::unique_ptr<RenderContext>& pRenderer)
 {
     if (filepath.empty())
         return nullptr;
 
-    auto pInternalTexture = Platform::CreateTexture(filepath.c_str(), pRenderer->GetInternal());
+    auto pInternalTexture = Platform::CreateTextureFromFile(filepath.c_str(), pRenderer->GetInternal());
     if (!pInternalTexture)
         return nullptr;
 

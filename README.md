@@ -47,3 +47,9 @@ Check
 Radio
 List
 
+# Game Loop
+Game supports optional vsync. If vsync is enabled (as specified in config.ini) then the target FPS (also specified in config.ini)
+will be ignored, and the game rendering will be synchonised with the monitor's refresh rate. If vsync is not enabled then the
+game rendering will aspire to run at the specified target FPS, or a default value of 60 if not specified in config.
+
+@TODO: Use something more accurate than SDL_GetTicks

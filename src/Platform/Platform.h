@@ -59,7 +59,8 @@ namespace Gin::Platform
     void RenderFillRect(Renderer* pRenderer, const Rect& rect);
     
     //Texture
-    Texture* CreateTexture(const char* path, Renderer* pRenderer);
+    Texture* CreateTexture(uint width, uint height, uint32_t format, Renderer* pRenderer);
+    Texture* CreateTextureFromFile(const char* path, Renderer* pRenderer);
     Texture* CreateTextureFromSurface(Surface* pSurface, Renderer* pRenderer);
     void DestroyTexture(Texture* texture);
 

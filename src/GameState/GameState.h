@@ -10,7 +10,6 @@
 #include "Entities/NPC.h"
 #include "Entities/Trigger.h"
 #include "WorldMap.h"
-#include "../Utilities/RuntimeClock.h"
 
 namespace Gin
 {
@@ -37,7 +36,7 @@ namespace Gin
 
         void ChangeMap(const WorldMap& worldMap, const Vector2f* pSpawnPos = nullptr);
 
-        void Update(const RuntimeClock& rtClock, bool& mapChange, std::string& nextMapName, Vector2f& spawnPos);
+        void Update(double dt, bool& mapChange, std::string& nextMapName, Vector2f& spawnPos);
 
         void PlayerWalk(const Direction& direction);
         void PlayerStopWalk(const Direction& direction);

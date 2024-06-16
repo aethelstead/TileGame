@@ -14,7 +14,7 @@ namespace Gin
     class Renderer
     {
     public:
-        static std::unique_ptr<Renderer> Create(const std::unique_ptr<Window>& pWindow);
+        static std::unique_ptr<Renderer> Create(const std::unique_ptr<Window>& pWindow, bool vsync = false);
 
     private:
         std::unique_ptr<RenderContext> m_pContext = nullptr;

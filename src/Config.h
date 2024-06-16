@@ -11,8 +11,10 @@ namespace Gin
         std::string windowTitle;
         uint windowWidth = 0;
         uint windowHeight = 0;
-        bool windowFullscreen;
+        bool windowFullscreen = false;
         std::string initMapName;
+        bool vsync = false;
+        uint fps = 0;
 
         bool LoadFromIni(const std::string& iniPath);
     };
@@ -23,7 +25,9 @@ namespace Gin
         .windowWidth = 1280,
         .windowHeight = 800,
         .windowFullscreen = false,
-        .initMapName = "overworld"
+        .initMapName = "overworld",
+        .vsync = true,
+        .fps = 60
     };
 }
 

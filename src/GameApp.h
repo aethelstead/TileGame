@@ -17,7 +17,6 @@
 #include "Maths/Vector2.h"
 #include "Maths/Rect.h"
 #include "Rendering/Renderer.h"
-#include "Utilities/RuntimeClock.h"
 
 namespace Gin
 {
@@ -40,10 +39,11 @@ namespace Gin
     private:
         bool m_running = false;
         bool m_paused = false;
+        bool m_vsync = false;
+        uint m_targetFPS = 0;
+        uint m_fps = 0;
 
         Recti m_viewRect;
-
-        RuntimeClock m_rtClock;
 
         std::unique_ptr<Window> m_pWindow;
         std::unique_ptr<Renderer> m_pRenderer;
@@ -56,6 +56,8 @@ namespace Gin
         GameState m_savedState;
 
         GameRenderer m_gameRenderer;
+
+        std::unique_ptr<Texture> m_renderTexture;
 
         std::unordered_map<GameViewType, std::shared_ptr<VGui::View>> m_viewMap;
         std::vector<std::shared_ptr<VGui::View>> m_activeViews;
@@ -98,8 +100,10 @@ namespace Gin
 
         void HandlePlatformEvents();
 
-        void Update();
-        void UpdateAnimations();
+        void Update(double dt);
+        void UpdateAnimations(double dt);
+
+        void Render();
     };
 }
 

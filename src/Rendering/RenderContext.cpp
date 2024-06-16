@@ -11,6 +11,8 @@ std::unique_ptr<RenderContext> RenderContext::Create(const std::unique_ptr<Windo
     if (!pInternalRenderer)
         return nullptr;
 
+    RenderContext::s_pixelFormat = SDL_GetWindowPixelFormat(pWindow->GetInternal());
+
     auto pRenderer = std::make_unique<RenderContext>(pInternalRenderer);
     return pRenderer;
 }

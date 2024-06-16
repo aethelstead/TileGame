@@ -3,13 +3,19 @@
 
 using namespace Gin;
 
-std::unique_ptr<Renderer> Renderer::Create(const std::unique_ptr<Window>& pWindow)
+std::unique_ptr<Renderer> Renderer::Create(const std::unique_ptr<Window>& pWindow, bool vsync)
 {
     if (!pWindow)
         return nullptr;
 
     auto pRenderer = std::make_unique<Renderer>();
     pRenderer->m_pContext = RenderContext::Create(pWindow);
+
+    if (vsync)
+    {
+        SDL_RenderSetVSync(pRenderer->GetContext()->GetInternal(), 1);
+        LOGINFO("Renderer::Create() - Vsync was enabled.");
+    }
 
     /// Enable alpha blending
     SDL_SetRenderDrawBlendMode(pRenderer->GetContext()->GetInternal(), SDL_BLENDMODE_BLEND);

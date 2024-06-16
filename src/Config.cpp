@@ -68,5 +68,17 @@ bool Config::LoadFromIni(const std::string& iniPath)
         this->initMapName = propVal;
     }
 
-    return false;
+    if (auto propVal = GetPropertyValue("vsync", props); !propVal.empty())
+    {
+        LOGDEBUG("Config::LoadFromIni() - Applying config property: 'vsync', from " << iniPath);
+        this->vsync = (propVal == "true" ? true : false);
+    }
+
+    if (auto propVal = GetPropertyValue("fps", props); !propVal.empty())
+    {
+        LOGDEBUG("Config::LoadFromIni() - Applying config property: 'fps', from " << iniPath);
+        this->fps = std::atoi(propVal.c_str());
+    }
+
+    return true;
 }

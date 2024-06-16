@@ -113,7 +113,7 @@ static bool CheckCollision(const Rectf& a, const Rectf& b, Vector2f& direction)
     return collision;
 }
 
-void GameState::Update(const RuntimeClock& rtClock, bool& mapChange, std::string& nextMapName, Vector2f& spawnPos)
+void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vector2f& spawnPos)
 {
     UpdateWorldTilesInView();
 

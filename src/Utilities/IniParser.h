@@ -12,7 +12,7 @@ namespace Gin
         std::map<std::string, std::string> Parse(const std::string& rawText);
 
     private:
-        bool ParseProperty(const std::string& rawText, std::string& keyText, std::string& valueText);
+        bool ParseProperty(std::string& rawLine, std::string& keyText, std::string& valueText);
     };
 }
 

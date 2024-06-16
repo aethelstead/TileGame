@@ -14,6 +14,8 @@ namespace Gin
     public:
         static std::unique_ptr<RenderContext> Create(const std::unique_ptr<Window>& pWindow);
 
+        static inline uint32_t s_pixelFormat = 0;
+
     private:
         Platform::Renderer* m_pInternalRenderer = nullptr;
 
