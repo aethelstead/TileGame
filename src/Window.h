@@ -15,6 +15,8 @@ namespace Gin
 
     private:
         Platform::Window* m_pInternalWindow = nullptr;
+        uint m_width;
+        uint m_height;
 
     public:
         Window()
@@ -25,6 +27,9 @@ namespace Gin
         Window(Platform::Window* pInternalWindow)
             : m_pInternalWindow( pInternalWindow )
         {}
+
+        uint Width() const { return m_width; }
+        uint Height() const { return m_height; }
 
         Platform::Window* GetInternal() const { return m_pInternalWindow; }
     };

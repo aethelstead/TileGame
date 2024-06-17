@@ -23,10 +23,10 @@ namespace Gin
     { 
         .windowTitle = "TileGame",
         .windowWidth = 1280,
-        .windowHeight = 800,
+        .windowHeight = 720,
         .windowFullscreen = false,
         .initMapName = "overworld",
-        .vsync = true,
+        .vsync = false,
         .fps = 60
     };
 }

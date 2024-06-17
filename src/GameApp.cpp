@@ -9,6 +9,9 @@
 #include "Config.h"
 #include "GameApp.h"
 
+constexpr uint XRES_INTERNAL = 640;
+constexpr uint YRES_INTERNAL = 360;
+
 using namespace Gin;
 
 bool GameApp::Init()
@@ -68,7 +71,7 @@ bool GameApp::Init()
         }
     }
 
-    m_viewRect = Recti(0, 0, config.windowWidth, config.windowHeight);
+    m_viewRect = Recti(0, 0, XRES_INTERNAL, YRES_INTERNAL);
 
     // Create a texture to render everything to (rendered at internal resolution then gets upscaled to display resolution)
     m_renderTexture = Texture::Create((uint)m_viewRect.w, (uint)m_viewRect.h, m_pRenderer->GetContext());
@@ -94,7 +97,7 @@ bool GameApp::Init()
         m_viewMap[ GameViewType::Stats ] = viewLoader.LoadView("assets/menu/stats.xml");
     }
 
-    m_state.Init(config.windowWidth, config.windowHeight);
+    m_state.Init(m_viewRect.w, m_viewRect.h);
 
     // Load initial game map and change map in GameState
     {
@@ -414,7 +417,7 @@ void GameApp::UpdateAnimations(double dt)
 
 void GameApp::Render()
 {
-    //SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), m_renderTexture->GetInternal());
+    SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), m_renderTexture->GetInternal());
     m_pRenderer->FillRect(m_viewRect, Colour4i::Black());
     m_gameRenderer.Render(m_pRenderer, m_state, m_textureMap);
 
@@ -426,9 +429,9 @@ void GameApp::Render()
         }*/
 
         
-    //SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), nullptr);
-    //Recti dest(0, 0, 1280, 720);
-    //m_pRenderer->Copy(m_renderTexture, m_viewRect, dest);
+    SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), nullptr);
+    Recti dest(0, 0, m_pWindow->Width(), m_pWindow->Height());
+    m_pRenderer->Copy(m_renderTexture, m_viewRect, dest);
     m_pRenderer->Present();
 }
 
