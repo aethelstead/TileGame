@@ -1,4 +1,5 @@
 #include <map>
+#include <set>
 #include <sstream>
 #include <vector>
 #include <iostream>
@@ -117,6 +118,7 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
 {
     UpdateWorldTilesInView();
 
+    // @TODO: Make this a std::set instead
     std::vector<Vector2f> collisionDirs;
 
     if (m_pPlayer->IsMoving())
@@ -136,21 +138,44 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
     }
 
     // Check player collision with solid tiles
+    {
+        for (const auto& worldTile : m_worldTilesInView)
+        {
+            for (const auto& box : worldTile.boxes)
+            {
+                Vector2f collDir;
+                if (CheckCollision(m_pPlayer->Box(), box, collDir))
+                {
+                    collisionDirs.emplace_back(collDir);
+                }
+            }
+        }
+    }
 
     // Check player collision with other entities
     for (const auto& pEntity : m_entities)
     {
-        if (pEntity->type == EntityType::Player)
+        if (pEntity->type == EntityType::NPC)
         {
-            // Ignore collision with self
-        }
-        else if (pEntity->type == EntityType::NPC)
-        {
-            //const auto& tileset = worldMap.m_tilesetMap[pEntity->tilesetId];
-            //auto coll = CheckCollisionDirection(m_pPlayer->Box(), pEntity->Box());
-            //collisionDirs.emplace_back(coll);
+            const auto& tileset = worldMap.m_tilesetMap[pEntity->tilesetId];
+            const auto& it = tileset.boxesMap.find(0);
+            // NPC has no collision boxes specified so is it's not a collideable-entity. Continue on.
+            if (it == tileset.boxesMap.end())
+                continue;
 
-        }
+            const auto& boxes = it->second;
+            for (const auto& box : boxes)
+            {
+                Rectf worldBox(pEntity->pos.x + box.x, pEntity->pos.y + box.y, box.w, box.h);
+
+                Vector2f collDir;
+                if (CheckCollision(m_pPlayer->Box(), worldBox, collDir))
+                {
+                    collisionDirs.emplace_back(collDir);
+                }
+            }
+
+        }/*
         else if (pEntity->type == EntityType::Trigger)
         {
             Vector2f coll;
@@ -161,8 +186,10 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
                 nextMapName = pTrigger->nextMapName;
                 spawnPos = pTrigger->nextMapSpawnPos;
             }
-        }
+        }*/
     }
+
+    LOGDEBUG(collisionDirs.size());
     
     // Zero-out the relevant velocity if there was a collision
     for (auto& collisionDir : collisionDirs)
@@ -263,6 +290,26 @@ void GameState::UpdateWorldTilesInView()
                 viewTile.box.y = (y * worldMap.m_tilemap.m_tileHeight);
                 viewTile.box.w = worldMap.m_tilemap.m_tileWidth;
                 viewTile.box.h = worldMap.m_tilemap.m_tileHeight;
+
+                const auto& tileset = worldMap.m_tilesetMap[tile.tilesetId];
+                const auto& it = tileset.boxesMap.find(tile.id);
+                if (it != tileset.boxesMap.end())
+                {
+                    const auto& boxes = it->second;
+                    for (const auto& box : boxes)
+                    {
+                        Rectf worldBox;
+                        
+                        // Adjust from local tileset space to world space
+                        worldBox.x = viewTile.box.x + box.x;
+                        worldBox.y = viewTile.box.y + box.y;
+
+                        worldBox.w = box.w;
+                        worldBox.h = box.h;
+
+                        viewTile.boxes.emplace_back(worldBox);
+                    }
+                }
 
                 m_worldTilesInView.emplace_back(viewTile);
             }

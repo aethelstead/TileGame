@@ -452,8 +452,8 @@ void GameApp::Loop()
         Update(dt);
 
         Render();
-
         uint64_t currTicks = Platform::Ticks64();
+
         int64_t delta = (currTicks - startTicks);
         if (delta < 0 || delta > MAX_DELTA)         // @TODO: Revise this. (Why is second condition necessary?)
             delta = 0;

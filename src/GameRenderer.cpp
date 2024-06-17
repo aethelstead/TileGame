@@ -30,7 +30,7 @@ void GameRenderer::RenderViewTiles(const std::unique_ptr<Renderer>& pRenderer, G
 {
     for (const auto& viewTile : viewTiles)
     {
-        auto tileset = state.worldMap.m_tilesetMap.at(viewTile.tilesetId);
+        const auto& tileset = state.worldMap.m_tilesetMap[viewTile.tilesetId];
         auto& pTexture = textureMap.at(tileset.textureId);
 
         Recti src;
@@ -44,7 +44,7 @@ void GameRenderer::RenderViewTiles(const std::unique_ptr<Renderer>& pRenderer, G
         dest.y = static_cast<int>(viewTile.box.y - state.camera.pos.y);
         dest.w = static_cast<int>(viewTile.box.w);
         dest.h = static_cast<int>(viewTile.box.h);
-                
+    
         pRenderer->Copy(pTexture, src, dest);
     }
 }

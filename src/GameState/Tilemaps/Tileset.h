@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 
+#include "../../Maths/Rect.h"
+
 namespace Gin
 {
     struct AnimationFrame
@@ -31,7 +33,7 @@ namespace Gin
         uint64_t tileWidth;
         uint64_t tileHeight;
         std::map<uint64_t, Animation> animationsMap;
-        //std::map<uint64_t, std::vector<Recti>> boxesMap;
+        std::map<uint64_t, std::vector<Rectf>> boxesMap;
     };
 }
 

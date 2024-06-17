@@ -37,6 +37,7 @@ static bool LoadTileset(const Tmx::Tileset* tmxTileset, Tileset& tileset)
 
     LOGDEBUG(tmxTileset->GetName() << " - firstTileId = " << tileset.firstTiledId);
 
+    // Load animations
     for (const auto& pTsxTile : tmxTileset->GetTiles())
     {
         /*
@@ -57,6 +58,22 @@ static bool LoadTileset(const Tmx::Tileset* tmxTileset, Tileset& tileset)
             }
             tileset.animationsMap.try_emplace(pTsxTile->GetId(), animation);
         }
+    }
+
+    // Load collision boxes
+    for (const auto& pTsxTile : tmxTileset->GetTiles())
+    {
+        auto pObjGroup = pTsxTile->GetObjectGroup();
+        if (!pObjGroup)
+            continue;
+            
+        std::vector<Rectf> boxes;
+        for (const auto& pObj : pObjGroup->GetObjects())
+        {
+            Rectf box(pObj->GetX(), pObj->GetY(), pObj->GetWidth(), pObj->GetHeight());
+            boxes.emplace_back(box);
+        }
+        tileset.boxesMap.try_emplace(pTsxTile->GetId(), boxes);
     }
 
     return true;

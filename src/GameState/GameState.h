@@ -19,6 +19,8 @@ namespace Gin
         uint zIdx = 0;
         uint frameIdx = 0;
 
+        std::vector<Rectf> boxes;
+
         WorldTile()
         {}
 
