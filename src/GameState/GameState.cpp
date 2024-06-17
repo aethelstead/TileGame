@@ -78,10 +78,6 @@ void GameState::ChangeMap(const WorldMap& worldMap, const Vector2f* pSpawnPos)
     
     camera.Init(m_pPlayer->Box(), this->worldMap.Bounds());
 
-    const int nTiles = worldMap.m_tilemap.m_tileWidth * worldMap.m_tilemap.m_tileHeight;
-    m_worldTilesInView.reserve(nTiles);
-    LOGDEBUG("GameState::ChangeMap() - Tilemap has " << nTiles << "tiles.");
-
     LOGDEBUG("GameState::ChangeMap() - WorldMap.Bounds = (0, 0, " << this->worldMap.Bounds().w << ", " << this->worldMap.Bounds().h << ").");
     LOGDEBUG("GameState::ChangeMap() - Camera.Bounds = (0, 0, " << camera.bounds.w << ", " << camera.bounds.h << ").");
     LOGDEBUG("GameState::ChangeMap() - Loaded: " << m_entities.size() << " Entities in total.");
@@ -137,6 +133,13 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
             collisionDirs.emplace_back(Vector2f::East());
     }
 
+    // @TODO: This assumes the player only has one collideable
+    const auto& playerTileset = worldMap.m_tilesetMap[m_pPlayer->tilesetId];
+    const auto& playerBoxes = playerTileset.boxesMap.at(0);
+    auto playerBox = playerBoxes.front();
+    playerBox.x = m_pPlayer->pos.x + playerBox.x;
+    playerBox.y = m_pPlayer->pos.y + playerBox.y;
+
     // Check player collision with solid tiles
     {
         for (const auto& worldTile : m_worldTilesInView)
@@ -144,7 +147,7 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
             for (const auto& box : worldTile.boxes)
             {
                 Vector2f collDir;
-                if (CheckCollision(m_pPlayer->Box(), box, collDir))
+                if (CheckCollision(playerBox, box, collDir))
                 {
                     collisionDirs.emplace_back(collDir);
                 }
@@ -169,13 +172,13 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
                 Rectf worldBox(pEntity->pos.x + box.x, pEntity->pos.y + box.y, box.w, box.h);
 
                 Vector2f collDir;
-                if (CheckCollision(m_pPlayer->Box(), worldBox, collDir))
+                if (CheckCollision(playerBox, worldBox, collDir))
                 {
                     collisionDirs.emplace_back(collDir);
                 }
             }
 
-        }/*
+        }
         else if (pEntity->type == EntityType::Trigger)
         {
             Vector2f coll;
@@ -186,10 +189,10 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
                 nextMapName = pTrigger->nextMapName;
                 spawnPos = pTrigger->nextMapSpawnPos;
             }
-        }*/
+        }
     }
 
-    LOGDEBUG(collisionDirs.size());
+    collisionDirs.clear();
     
     // Zero-out the relevant velocity if there was a collision
     for (auto& collisionDir : collisionDirs)
@@ -248,6 +251,8 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
 
 void GameState::UpdateWorldTilesInView()
 {
+    // @TODO: Reserve space for world tiles in view ahead of time
+
     m_worldTilesInView.clear();
 
     bool scrollsX = (camera.width < (worldMap.m_tilemap.mapWidth * worldMap.m_tilemap.m_tileWidth));
