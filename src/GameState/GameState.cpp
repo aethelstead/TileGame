@@ -191,8 +191,6 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
             }
         }
     }
-
-    collisionDirs.clear();
     
     // Zero-out the relevant velocity if there was a collision
     for (auto& collisionDir : collisionDirs)

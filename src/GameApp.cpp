@@ -119,7 +119,7 @@ bool GameApp::Init()
         m_state.ChangeMap(worldMap);
     }
 
-    //m_savedState = m_state;
+    m_savedState = m_state;
 
     LOGINFO("GameApp::Init() - Initialisation successful.");
 

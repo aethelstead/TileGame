@@ -30,7 +30,7 @@ void GameRenderer::RenderViewTiles(const std::unique_ptr<Renderer>& pRenderer, G
 {
     for (const auto& viewTile : viewTiles)
     {
-        const auto& tileset = state.worldMap.m_tilesetMap[viewTile.tilesetId];
+        const auto& tileset = state.worldMap.m_tilesetMap.at(viewTile.tilesetId);
         auto& pTexture = textureMap.at(tileset.textureId);
 
         Recti src;
