@@ -7,4 +7,4 @@ $(find . -type f -iregex .*\\.cpp) \
 \
 -o bin/gin \
 \
--lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -ltmxparser -ltinyxml2 -ltmx -lxml2 -lz -llzma
+-lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -ltinyxml2 -ltmx -lxml2 -lz -llzma

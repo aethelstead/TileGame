@@ -1,9 +1,7 @@
-#include "../Tiled.h"
-
-#ifdef USE_NEW_TILED_LIB
-
 #include <sstream>
 #include <tmx.h>
+
+#include "../Tiled.h"
 #include "../../Debug.h"
 
 using namespace Gin::Tiled;
@@ -224,5 +222,3 @@ bool Gin::Tiled::LoadTiledMapFromFile(const std::string& tmxPath, Tiled::Map& th
 
     return true;
 }
-
-#endif

@@ -10,8 +10,6 @@
 #include "Tilemap.h"
 #include "Object.h"
 
-#define USE_NEW_TILED_LIB
-
 namespace Gin::Tiled
 {
     struct Map
