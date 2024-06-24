@@ -9,11 +9,11 @@
 #include "Entities/Player.h"
 #include "Entities/NPC.h"
 #include "Entities/Trigger.h"
-#include "WorldMap.h"
+#include "../Tiled/Tiled.h"
 
 namespace Gin
 {
-    struct WorldTile : Tile
+    struct WorldTile : Tiled::Tile
     {
         Rectf box;
         uint zIdx = 0;
@@ -36,7 +36,7 @@ namespace Gin
 
         void Init(uint64_t viewWidth, uint64_t viewHeight);
 
-        void ChangeMap(const WorldMap& worldMap, const Vector2f* pSpawnPos = nullptr);
+        void ChangeMap(const Tiled::Map& tiledMap, const Vector2f* pSpawnPos = nullptr);
 
         void Update(double dt, bool& mapChange, std::string& nextMapName, Vector2f& spawnPos);
 
@@ -49,7 +49,8 @@ namespace Gin
         void UpdateWorldTilesInView();
 
         Camera camera;
-        WorldMap worldMap;
+        Tiled::Tilemap m_tilemap;
+        std::map<uint64_t, Tiled::Tileset> m_tilesetMap;
 
         std::vector<WorldTile> m_worldTilesInView;
         

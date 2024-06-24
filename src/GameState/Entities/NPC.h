@@ -10,12 +10,16 @@ namespace Gin
         NPC()
         {}
 
-        void FromProto(const EntityProto& proto) override
+        NPC(UniqueID uid, uint64_t tilesetId, Vector2f pos, uint64_t width, uint64_t height, uint zIdx)
+            : Entity( uid, tilesetId, pos, width, height, zIdx )
         {
-            Entity::FromProto(proto);
             type = EntityType::NPC;
             speed = 2;
+            //animId = static_cast<uint>(PlayerAnimationType::IdleSouth);
+            //ready = true;
         }
+
+        void GetRidOfMe() override {}
     };
 }
 

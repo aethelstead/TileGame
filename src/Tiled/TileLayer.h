@@ -5,7 +5,7 @@
 
 #include "Tile.h"
 
-namespace Gin
+namespace Gin::Tiled
 {
     struct TileLayer
     {

@@ -8,6 +8,7 @@
 
 #include "Config.h"
 #include "GameApp.h"
+#include "Tiled/Tiled.h"
 
 constexpr uint XRES_INTERNAL = 640;
 constexpr uint YRES_INTERNAL = 360;
@@ -101,12 +102,12 @@ bool GameApp::Init()
 
     // Load initial game map and change map in GameState
     {
-        WorldMap worldMap;
+        Tiled::Map tiledMap;
         if (!config.initMapName.empty())
         {
-            if (!LoadGameMap(config.initMapName, worldMap))
+            if (!LoadGameMap(config.initMapName, tiledMap))
             {
-                LOGWARN("GameApp::Init() - Initial game map could not be loaded.");
+                LOGERROR("GameApp::Init() - Initial game map: '" << config.initMapName << "' failed to load.");
                 return false;
             }
         }
@@ -116,10 +117,10 @@ bool GameApp::Init()
         }
         LOGINFO("GameApp::Init() - Loaded initial game map: " << config.initMapName);
     
-        m_state.ChangeMap(worldMap);
+        m_state.ChangeMap(tiledMap);
     }
 
-    m_savedState = m_state;
+    //m_savedState = m_state;
 
     LOGINFO("GameApp::Init() - Initialisation successful.");
 
@@ -133,7 +134,7 @@ void GameApp::Quit()
     SDL_Quit();
 }
 
-bool GameApp::LoadGameMap(const std::string& mapName, WorldMap& worldMap)
+bool GameApp::LoadGameMap(const std::string& mapName, Tiled::Map& tiledMap)
 {
     m_textureMap.clear();
     
@@ -144,14 +145,14 @@ bool GameApp::LoadGameMap(const std::string& mapName, WorldMap& worldMap)
         ss << MAP_PATH << mapName << ".tmx";
         mapPath = ss.str();
     }
-    LOGINFO("GameApp::LoadGameMap() - Loading game map from: " << mapPath);
+    LOGINFO("GameApp::LoadGameMap() - Trying to load game map from: " << mapPath << "...");
 
-    if (!worldMap.LoadFromTmx(mapPath, worldMap))
+    if (!Tiled::LoadTiledMapFromFile(mapPath, tiledMap))
         return false;
 
     // Load texture for each tileset
     std::stringstream ss;
-    for (auto& [_, tileset] : worldMap.m_tilesetMap)
+    for (auto& [_, tileset] : tiledMap.tilesetMap)
     {
         // @TODO: Tiled returns tileset.texturePath's as "img/tileset.tsx". Inconsistent with game map loading etc.
         // Fix texture img filepath
@@ -197,13 +198,13 @@ UniqueID GameApp::LoadTexture(const std::string& path)
 
 void GameApp::QuickSave()
 {
-    m_savedState = m_state;
+    //m_savedState = m_state;
     LOGINFO("GameApp::QuickSave() - Quick save done.");
 }
 
 void GameApp::QuickLoad()
 {
-    m_state = m_savedState;
+    //m_state = m_savedState;
     LOGINFO("GameApp::QuickLoad() - Quick load done.");
 }
 
@@ -344,16 +345,16 @@ void GameApp::Update(double dt)
 
         if (mapChange)
         {
-            WorldMap worldMap;
-            if (!LoadGameMap(nextMapName, worldMap))
+            Tiled::Map tiledMap;
+            if (!LoadGameMap(nextMapName, tiledMap))
             {
                 LOGDEBUG("GameApp::Update() - Failed to load new game map.");
                 return;
             }
 
-            m_state.ChangeMap(worldMap, &spawnPos);
+            m_state.ChangeMap(tiledMap, &spawnPos);
         } 
-    } 
+    }
 }
 
 void GameApp::UpdateAnimations(double dt)
@@ -361,7 +362,7 @@ void GameApp::UpdateAnimations(double dt)
     // @TODO: This seems to be updating all animations regardless of whether or not they are shown
 
     // Update Tileset animations
-    for (auto& [_, tileset] : m_state.worldMap.m_tilesetMap)
+    for (auto& [_, tileset] : m_state.m_tilesetMap)
     {
         for (auto& [_, animation] : tileset.animationsMap)
         {
@@ -387,7 +388,7 @@ void GameApp::UpdateAnimations(double dt)
         auto& viewTiles = m_state.WorldTilesInView();
         for (auto& viewTile : viewTiles)
         {
-            const auto& tileset = m_state.worldMap.m_tilesetMap[viewTile.tilesetId];
+            const auto& tileset = m_state.m_tilesetMap[viewTile.tilesetId];
             const auto& it = tileset.animationsMap.find(viewTile.id);
             
             // Tile has no animations. Continue on to the next tile.
@@ -403,7 +404,7 @@ void GameApp::UpdateAnimations(double dt)
     {
         for (auto& pEntity : m_state.m_entities)
         {
-            const auto& tileset = m_state.worldMap.m_tilesetMap[pEntity->tilesetId];
+            const auto& tileset = m_state.m_tilesetMap[pEntity->tilesetId];
             const auto& it = tileset.animationsMap.find(pEntity->animId);
 
             if (it == tileset.animationsMap.end())

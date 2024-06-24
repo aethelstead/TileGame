@@ -30,7 +30,7 @@ void GameRenderer::RenderViewTiles(const std::unique_ptr<Renderer>& pRenderer, G
 {
     for (const auto& viewTile : viewTiles)
     {
-        const auto& tileset = state.worldMap.m_tilesetMap.at(viewTile.tilesetId);
+        const auto& tileset = state.m_tilesetMap.at(viewTile.tilesetId);
         auto& pTexture = textureMap.at(tileset.textureId);
 
         Recti src;
@@ -68,7 +68,7 @@ void GameRenderer::RenderEntity(const std::unique_ptr<Renderer>& pRenderer, Game
     if (pEntity->tilesetId == 0)
         return;
 
-    const auto& tileset = state.worldMap.m_tilesetMap.at(pEntity->tilesetId);
+    const auto& tileset = state.m_tilesetMap.at(pEntity->tilesetId);
     
     Recti src(
         (pEntity->frameIdx % tileset.tilesPerRow) * tileset.tileWidth,

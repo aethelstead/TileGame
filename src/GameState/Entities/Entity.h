@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "../../Utilities/UniqueID.h"
-#include "EntityProto.h"
 #include "../Direction.h"
 #include "EntityType.h"
 #include "../../Maths/Rect.h"
@@ -16,14 +15,16 @@ namespace Gin
         Entity()
         {}
 
-        virtual void FromProto(const EntityProto& proto)
-        {
-            tilesetId = proto.tilesetId;
-            pos = proto.pos;
-            width = proto.width;
-            height = proto.height;
-            zIdx = proto.zIdx;
-        }
+        Entity(UniqueID uid, uint64_t tilesetId, Vector2f pos, uint64_t width, uint64_t height, uint zIdx)
+            : id( uid )
+            , tilesetId( tilesetId )
+            , pos( pos )
+            , width( width )
+            , height( height )
+            , zIdx( zIdx )
+        {}
+
+        virtual void GetRidOfMe() = 0;
 
         Rectf Box() const
         {

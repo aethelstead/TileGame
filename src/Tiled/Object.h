@@ -1,24 +1,21 @@
-#ifndef ENTITY_PROTO
-#define ENTITY_PROTO
+#ifndef TILED_OBJECT_H
+#define TILED_OBJECT_H
 
 #include <cstdint>
 #include <string>
 #include <map>
 
-#include "EntityType.h"
-#include "../../Maths/Vector2.h"
+#include "../Maths/Vector2.h"
 
-namespace Gin
+namespace Gin::Tiled
 {
-    struct EntityProto
+    struct Object
     {
         Vector2f pos;
         uint64_t width = 0;
         uint64_t height = 0;
         uint64_t zIdx = 0;
         uint64_t tilesetId = 0;
-        EntityType type = EntityType::None;
-        std::string archetypeName;
         std::map<std::string, std::string> props;
     };
 }

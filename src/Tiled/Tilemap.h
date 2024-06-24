@@ -10,15 +10,15 @@
 #include "TileLayer.h"
 #include "Tileset.h"
 
-namespace Gin
+namespace Gin::Tiled
 {
     struct Tilemap
     {
         uint64_t mapWidth;
         uint64_t mapHeight;
-        uint64_t m_tileWidth;
-        uint64_t m_tileHeight;
-        std::vector<TileLayer> m_layers;
+        uint64_t tileWidth;
+        uint64_t tileHeight;
+        std::vector<TileLayer> layers;
     };
 }
 

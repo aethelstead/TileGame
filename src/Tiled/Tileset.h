@@ -6,9 +6,9 @@
 #include <vector>
 #include <map>
 
-#include "../../Maths/Rect.h"
+#include "../Maths/Rect.h"
 
-namespace Gin
+namespace Gin::Tiled
 {
     struct AnimationFrame
     {

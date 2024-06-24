@@ -53,7 +53,7 @@ namespace Gin
         SfxMap m_sfxMap;
     
         GameState m_state;
-        GameState m_savedState;
+        //GameState m_savedState;
 
         GameRenderer m_gameRenderer;
 
@@ -83,7 +83,7 @@ namespace Gin
 
     private:
 
-        bool LoadGameMap(const std::string& mapName, WorldMap& worldMap);
+        bool LoadGameMap(const std::string& mapName, Tiled::Map& tiledMap);
 
         UniqueID LoadTexture(const std::string& path);
 

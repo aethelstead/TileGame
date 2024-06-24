@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace Gin
+namespace Gin::Tiled
 {
     struct Tile
     {

@@ -1,16 +1,16 @@
 #include <Tmx.h>
 
-#include "WorldMap.h"
-#include "../Debug.h"
+#include "../Tiled.h"
+#include "../../Debug.h"
 
-using namespace Gin;
+#ifndef USE_NEW_TILED_LIB
 
+using namespace Gin::Tiled;
+
+// @TODO: Duplicate, move somewhere else
 static std::string GetPropertyValue(const std::map<std::string, std::string>& propertyMap, const std::string& key)
 {
     auto s = std::string();
-
-    if (propertyMap.empty() || key.empty())
-        return s;
 
     auto it = propertyMap.find(key);
     bool foundIt = (it != propertyMap.end());
@@ -40,24 +40,19 @@ static bool LoadTileset(const Tmx::Tileset* tmxTileset, Tileset& tileset)
     // Load animations
     for (const auto& pTsxTile : tmxTileset->GetTiles())
     {
-        /*
-        auto pObjGroup = pTsxTile->GetObjectGroup();
-        if (!pObjGroup)
-            continue;*/
+        if (pTsxTile->GetFrames().empty())
+            continue;
 
-        if (!pTsxTile->GetFrames().empty())
+        Animation animation;
+        for (const auto& tsxFrame : pTsxTile->GetFrames())
         {
-            Animation animation;
-            for (const auto& tsxFrame : pTsxTile->GetFrames())
-            {
-                AnimationFrame frame;
-                frame.id = tsxFrame.GetTileID();
-                frame.duration = tsxFrame.GetDuration();
+            AnimationFrame frame;
+            frame.id = tsxFrame.GetTileID();
+            frame.duration = tsxFrame.GetDuration();
 
-                animation.frames.emplace_back(frame);
-            }
-            tileset.animationsMap.try_emplace(pTsxTile->GetId(), animation);
+            animation.frames.emplace_back(frame);
         }
+        tileset.animationsMap.try_emplace(pTsxTile->GetId(), animation);
     }
 
     // Load collision boxes
@@ -79,13 +74,13 @@ static bool LoadTileset(const Tmx::Tileset* tmxTileset, Tileset& tileset)
     return true;
 }
 
-static bool LoadTmxMap(const Tmx::Map& tmxMap, Tilemap& tilemap, std::map<uint64_t, Tileset>& tilesetMap, std::vector<EntityProto>& entityProtos)
+static bool LoadTmxMap(const Tmx::Map& tmxMap, Tilemap& tilemap, std::map<uint64_t, Tileset>& tilesetMap, std::vector<Object>& objects)
 {
     //tilemap.name = tmxMap.GetFilename();
     tilemap.mapWidth = tmxMap.GetWidth();
     tilemap.mapHeight = tmxMap.GetHeight();
-    tilemap.m_tileWidth = tmxMap.GetTileWidth();
-    tilemap.m_tileHeight = tmxMap.GetTileHeight();
+    tilemap.tileWidth = tmxMap.GetTileWidth();
+    tilemap.tileHeight = tmxMap.GetTileHeight();
 
     // Load all tilesets
     for (const auto pTmxTileset : tmxMap.GetTilesets())
@@ -119,15 +114,15 @@ static bool LoadTmxMap(const Tmx::Map& tmxMap, Tilemap& tilemap, std::map<uint64
             layer.tiles.push_back(Tile(tmxTile.id, tmxTile.gid, tilesetId));
         }
 
-        tilemap.m_layers.push_back(layer);
+        tilemap.layers.push_back(layer);
     }
 
     // Get the z-index of the object layer
     int objLayerZIdx = -1;
-    for (uint i = 0; i < tilemap.m_layers.size(); i++)
+    for (uint i = 0; i < tilemap.layers.size(); i++)
     {
-        int currZ = tilemap.m_layers[i].zIdx;
-        int nextZ = tilemap.m_layers[i + 1].zIdx;
+        int currZ = tilemap.layers[i].zIdx;
+        int nextZ = tilemap.layers[i + 1].zIdx;
         if (currZ != nextZ - 1)
         {
             objLayerZIdx = currZ + 1;
@@ -142,7 +137,7 @@ static bool LoadTmxMap(const Tmx::Map& tmxMap, Tilemap& tilemap, std::map<uint64
         return false;
     }
 
-    // Load entity prototypes
+    // Load objects
     for (const auto& pObjGroup : tmxMap.GetObjectGroups())
     {
         if (!pObjGroup)
@@ -153,56 +148,37 @@ static bool LoadTmxMap(const Tmx::Map& tmxMap, Tilemap& tilemap, std::map<uint64
             if (!pObj)
                 continue;
 
-            EntityProto proto;
-            proto.pos.x = static_cast<double>(pObj->GetX());
-            proto.pos.y = static_cast<double>(pObj->GetY());
-            proto.width = pObj->GetWidth();
-            proto.height = pObj->GetHeight();
-            proto.tilesetId = pObj->GetGid();
-            proto.zIdx = objLayerZIdx;
+            Object object;
+            object.pos.x = static_cast<double>(pObj->GetX());
+            object.pos.y = static_cast<double>(pObj->GetY());
+            object.width = pObj->GetWidth();
+            object.height = pObj->GetHeight();
+            object.tilesetId = pObj->GetGid();
+            object.zIdx = objLayerZIdx;
 
-            proto.props = pObj->GetProperties().GetList();
+            object.props = pObj->GetProperties().GetList();
 
-            auto typePropVal = GetPropertyValue(proto.props, "type");
-            if (typePropVal.empty())
-            {
-                LOGWARN("WorldMap::LoadFromTmx() - Map object did not have an associated 'type' property. Object will not be added to the WorldMap.");
-                continue;
-            }
-
-            proto.type = EntityTypeFromString(typePropVal);
-            if (proto.type == EntityType::None)
-            {
-                LOGWARN("WorldMap::LoadFromTmx() - Map object did not have a recognised EntityType. Object will not be added to the WorldMap.");
-                continue;
-            }
-
-            auto archetypePropVal = GetPropertyValue(proto.props, "archetype");
-            if (archetypePropVal.empty())
-            {
-                LOGWARN("WorldMap::LoadFromTmx() - Map object did not have an associated 'archetype' property. Object will not be added to the WorldMap.");
-                continue;
-            }
-
-            proto.archetypeName = archetypePropVal;
-
-            entityProtos.emplace_back(proto);
+            objects.emplace_back(object);
         }
     }
 
     return true;
 }
 
-bool WorldMap::LoadFromTmx(const std::string& tmxPath, WorldMap& worldMap)
+bool Gin::Tiled::LoadTiledMapFromFile(const std::string& tmxPath, Tiled::Map& theMap)
 {
+    LOGDEBUG("Gin::Tiled::LoadTiledMapFromFile() - Using 'tmxparser'.");
+
     auto tmxMap = Tmx::Map();
 
     tmxMap.ParseFile(tmxPath);
     if (tmxMap.HasError())
         return false;
 
-    if (!LoadTmxMap(tmxMap, worldMap.m_tilemap, worldMap.m_tilesetMap, worldMap.m_entityProtos))
+    if (!LoadTmxMap(tmxMap, theMap.tilemap, theMap.tilesetMap, theMap.objects))
         return false;
 
     return true;
 }
+
+#endif

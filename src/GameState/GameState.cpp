@@ -9,6 +9,7 @@
 #include "../Assets.h"
 #include "../Debug.h"
 #include "../Maths/Vector2.h"
+#include "Entities/EntityFactory.h"
 
 using namespace Gin;
 
@@ -18,39 +19,24 @@ void GameState::Init(uint64_t viewWidth, uint64_t viewHeight)
     camera.height = viewHeight;
 }
 
-void GameState::ChangeMap(const WorldMap& worldMap, const Vector2f* pSpawnPos)
+void GameState::ChangeMap(const Tiled::Map& tiledMap, const Vector2f* pSpawnPos)
 {
     m_entities.clear();
 
-    this->worldMap = worldMap;
-
-    // Load entities from entity protos
-    for (const auto& proto : this->worldMap.m_entityProtos)
+    // Load tilemap
+    m_tilemap = tiledMap.tilemap;
+    
+    // Load tilesets
+    for (const auto& [id, tileset] : tiledMap.tilesetMap)
     {
-        std::shared_ptr<Entity> pEntity = nullptr;
-        if (proto.type == EntityType::Player)
-        {
-            pEntity = std::make_shared<Player>();
-            pEntity->FromProto(proto);
+        m_tilesetMap.try_emplace(id, tileset);
+    }
 
-            LOGINFO("GameState::ChangeMap() - Created Player from EntityProto");
-        }
-        else if (proto.type  == EntityType::NPC)
-        {
-            pEntity = std::make_shared<NPC>();
-            pEntity->FromProto(proto);
-
-            LOGINFO("GameState::ChangeMap() - Created NPC from EntityProto");
-        }
-        else if (proto.type  == EntityType::Trigger)
-        {
-            pEntity = std::make_shared<Trigger>();
-            pEntity->FromProto(proto);
-
-            LOGINFO("GameState::ChangeMap() - Created Trigger from EntityProto");
-        }
-        pEntity->id = UniqueIDGenerator::Next();
-
+    // Load entities from Tiled objects
+    EntityFactory entityFactory;
+    for (const auto& obj : tiledMap.objects)
+    {
+        auto pEntity = entityFactory.CreateEntity(obj);
         m_entities.emplace_back(pEntity);
     }
 
@@ -76,9 +62,10 @@ void GameState::ChangeMap(const WorldMap& worldMap, const Vector2f* pSpawnPos)
         LOGDEBUG("GameState::ChangeMap() - pSpawnPos was NOT specified. Player will spawn at default position for map.");
     }
     
-    camera.Init(m_pPlayer->Box(), this->worldMap.Bounds());
+    Rectf bounds(0, 0, tiledMap.tilemap.mapWidth * tiledMap.tilemap.tileWidth, tiledMap.tilemap.mapHeight * tiledMap.tilemap.tileHeight);
+    camera.Init(m_pPlayer->Box(), bounds);
 
-    LOGDEBUG("GameState::ChangeMap() - WorldMap.Bounds = (0, 0, " << this->worldMap.Bounds().w << ", " << this->worldMap.Bounds().h << ").");
+    //LOGDEBUG("GameState::ChangeMap() - WorldMap.Bounds = (0, 0, " << this->tiledMap.Bounds().w << ", " << this->worldMap.Bounds().h << ").");
     LOGDEBUG("GameState::ChangeMap() - Camera.Bounds = (0, 0, " << camera.bounds.w << ", " << camera.bounds.h << ").");
     LOGDEBUG("GameState::ChangeMap() - Loaded: " << m_entities.size() << " Entities in total.");
 }
@@ -122,6 +109,7 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
 
     // Check player collision with map edge
     {
+        /*
         if (m_pPlayer->pos.y <= worldMap.Bounds().y)
             collisionDirs.emplace_back(Vector2f::North());
         else if (m_pPlayer->pos.y + m_pPlayer->height >= worldMap.Bounds().h)
@@ -130,11 +118,11 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
         if (m_pPlayer->pos.x <= worldMap.Bounds().x)
             collisionDirs.emplace_back(Vector2f::West());
         else if (m_pPlayer->pos.x + m_pPlayer->width >= worldMap.Bounds().w)
-            collisionDirs.emplace_back(Vector2f::East());
+            collisionDirs.emplace_back(Vector2f::East());*/
     }
 
     // @TODO: This assumes the player only has one collideable
-    const auto& playerTileset = worldMap.m_tilesetMap[m_pPlayer->tilesetId];
+    const auto& playerTileset = m_tilesetMap[m_pPlayer->tilesetId];
     const auto& playerBoxes = playerTileset.boxesMap.at(0);
     auto playerBox = playerBoxes.front();
     playerBox.x = m_pPlayer->pos.x + playerBox.x;
@@ -160,7 +148,7 @@ void GameState::Update(double dt, bool& mapChange, std::string& nextMapName, Vec
     {
         if (pEntity->type == EntityType::NPC)
         {
-            const auto& tileset = worldMap.m_tilesetMap[pEntity->tilesetId];
+            const auto& tileset = m_tilesetMap[pEntity->tilesetId];
             const auto& it = tileset.boxesMap.find(0);
             // NPC has no collision boxes specified so is it's not a collideable-entity. Continue on.
             if (it == tileset.boxesMap.end())
@@ -253,33 +241,33 @@ void GameState::UpdateWorldTilesInView()
 
     m_worldTilesInView.clear();
 
-    bool scrollsX = (camera.width < (worldMap.m_tilemap.mapWidth * worldMap.m_tilemap.m_tileWidth));
-    bool scrollsY = (camera.height < (worldMap.m_tilemap.mapHeight * worldMap.m_tilemap.m_tileHeight));
+    bool scrollsX = (camera.width < (m_tilemap.mapWidth * m_tilemap.tileWidth));
+    bool scrollsY = (camera.height < (m_tilemap.mapHeight * m_tilemap.tileHeight));
 
     // +1 extra tile X & Y ways for rendering purposes.
-    uint64_t maxTilesInViewX = (scrollsX) ? (camera.width / worldMap.m_tilemap.m_tileWidth) + 2 : worldMap.m_tilemap.mapWidth;
-    uint64_t maxTilesInViewY = (scrollsY) ? (camera.height / worldMap.m_tilemap.m_tileHeight) + 2 : worldMap.m_tilemap.mapHeight;
+    uint64_t maxTilesInViewX = (scrollsX) ? (camera.width / m_tilemap.tileWidth) + 2 : m_tilemap.mapWidth;
+    uint64_t maxTilesInViewY = (scrollsY) ? (camera.height / m_tilemap.tileHeight) + 2 : m_tilemap.mapHeight;
 
-    uint64_t startX = (camera.pos.x / worldMap.m_tilemap.m_tileWidth);
-    uint64_t startY = (camera.pos.y / worldMap.m_tilemap.m_tileHeight);
+    uint64_t startX = (camera.pos.x / m_tilemap.tileWidth);
+    uint64_t startY = (camera.pos.y / m_tilemap.tileHeight);
 
     uint64_t endX = startX + maxTilesInViewX;
     uint64_t endY = startY + maxTilesInViewY;
     
     // Clamp the endX/Y indexes to the tilemap width/ height if either goes over.
-    if (endX > worldMap.m_tilemap.mapWidth)
-        endX = worldMap.m_tilemap.mapWidth;
+    if (endX > m_tilemap.mapWidth)
+        endX = m_tilemap.mapWidth;
 
-    if (endY > worldMap.m_tilemap.mapHeight)
-        endY = worldMap.m_tilemap.mapHeight;
+    if (endY > m_tilemap.mapHeight)
+        endY = m_tilemap.mapHeight;
 
-    for (const auto& layer : worldMap.m_tilemap.m_layers)
+    for (const auto& layer : m_tilemap.layers)
     {
         for (uint64_t y = startY; y < endY; ++y)
         {
             for (uint64_t x = startX; x < endX; ++x)
             {
-                auto tileIdx = (y * worldMap.m_tilemap.mapWidth) + x;
+                auto tileIdx = (y * m_tilemap.mapWidth) + x;
                 auto tile = layer.tiles[tileIdx];
                 if (tile.tilesetId == 0)
                     continue;
@@ -289,12 +277,12 @@ void GameState::UpdateWorldTilesInView()
                 viewTile.zIdx = layer.zIdx;
 
                 // Set destination rect
-                viewTile.box.x = (x * worldMap.m_tilemap.m_tileWidth);
-                viewTile.box.y = (y * worldMap.m_tilemap.m_tileHeight);
-                viewTile.box.w = worldMap.m_tilemap.m_tileWidth;
-                viewTile.box.h = worldMap.m_tilemap.m_tileHeight;
+                viewTile.box.x = (x * m_tilemap.tileWidth);
+                viewTile.box.y = (y * m_tilemap.tileHeight);
+                viewTile.box.w = m_tilemap.tileWidth;
+                viewTile.box.h = m_tilemap.tileHeight;
 
-                const auto& tileset = worldMap.m_tilesetMap[tile.tilesetId];
+                const auto& tileset = m_tilesetMap[tile.tilesetId];
                 const auto& it = tileset.boxesMap.find(tile.id);
                 if (it != tileset.boxesMap.end())
                 {

@@ -34,6 +34,12 @@ Widescreen
 2048x1280
 2560x1440
 
+Current Supported Resolutions:
+
+1280x720
+1920x1080
+2560x1440
+
 ## VGui
 
 Menu

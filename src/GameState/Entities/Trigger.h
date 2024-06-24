@@ -14,8 +14,14 @@ namespace Gin
 
         Trigger()
         {}
-        
-        void FromProto(const EntityProto& proto) override;
+
+        Trigger(UniqueID uid, uint64_t tilesetId, Vector2f pos, uint64_t width, uint64_t height, uint zIdx)
+            : Entity( uid, tilesetId, pos, width, height, zIdx )
+        {
+            type = EntityType::Trigger;
+        }
+
+        void GetRidOfMe() override {}
     };
 }
 
