@@ -13,7 +13,11 @@
 constexpr uint XRES_INTERNAL = 640;
 constexpr uint YRES_INTERNAL = 360;
 
+constexpr char* CHARSET = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
 using namespace Gin;
+
+
 
 bool GameApp::Init()
 {
@@ -70,6 +74,8 @@ bool GameApp::Init()
         LOGWARN("GameApp::Init() - Failed to open font: 'assets/font/arial_bold.ttf'");
     }
 
+    m_glyphSheet.Load(m_pRenderer, "assets/font/arial_bold.ttf", 16);
+
     m_viewRect = Recti(0, 0, XRES_INTERNAL, YRES_INTERNAL);
 
     // Create a texture to render everything to (rendered at internal resolution then gets upscaled to display resolution)
@@ -82,7 +88,8 @@ bool GameApp::Init()
 
     // Init menus
     {
-        VGui::ViewLoader viewLoader(m_viewRect, m_pRenderer, m_pFont);
+        Recti screenRect(0, 0, m_pWindow->Width(), m_pWindow->Height());
+        VGui::ViewLoader viewLoader(screenRect, m_pRenderer, m_pFont);
 
         // @TODO: Error checking LoadMenu
         // Add all of the required menus to the menu map
@@ -419,17 +426,18 @@ void GameApp::Render()
     SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), m_renderTexture->GetInternal());
     m_pRenderer->FillRect(m_viewRect, Colour4i::Black());
     m_gameRenderer.Render(m_pRenderer, m_state, m_textureMap);
-
-        /*
-        // Render any active views
-        for (const auto& pView : m_activeViews)
-        {   
-            pView->Render(m_pRenderer);
-        }*/
-        
     SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), nullptr);
     Recti dest(0, 0, m_pWindow->Width(), m_pWindow->Height());
     m_pRenderer->Copy(m_renderTexture, m_viewRect, dest);
+
+    // Render any active views
+    for (const auto& pView : m_activeViews)
+    {   
+        pView->Render(m_pRenderer);
+    }
+
+    Recti sheetRect(0, 0, 160, 160);
+    m_pRenderer->Copy(m_glyphSheet.m_pTexture, sheetRect);
 
     m_pRenderer->Present();
 }

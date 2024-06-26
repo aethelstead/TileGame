@@ -46,12 +46,12 @@ void View::RenderElement(const std::shared_ptr<VGui::Element>& pElem, const std:
 
 void View::RenderBorder(const std::shared_ptr<Element>& pElem, const std::unique_ptr<Renderer>& pRenderer) const
 {
-    Recti nr(pElem->box.x, pElem->box.y, pElem->box.w, pElem->borderWidth);
-    Recti er((pElem->box.x + pElem->box.w) - pElem->borderWidth, pElem->box.y, pElem->borderWidth, pElem->box.h);
-    Recti sr(pElem->box.x, (pElem->box.y + pElem->box.h) - pElem->borderWidth, pElem->box.w, pElem->borderWidth);
-    Recti wr(pElem->box.x, pElem->box.y, pElem->borderWidth, pElem->box.h);
-    pRenderer->FillRect(nr, pElem->borderColour);
-    pRenderer->FillRect(er, pElem->borderColour);
-    pRenderer->FillRect(sr, pElem->borderColour);
-    pRenderer->FillRect(wr, pElem->borderColour);
+    Recti topRect(pElem->box.x, pElem->box.y, pElem->box.w, pElem->borderWidth);
+    Recti rightRect((pElem->box.x + pElem->box.w) - pElem->borderWidth, pElem->box.y, pElem->borderWidth, pElem->box.h);
+    Recti bottomRect(pElem->box.x, (pElem->box.y + pElem->box.h) - pElem->borderWidth, pElem->box.w, pElem->borderWidth);
+    Recti leftRect(pElem->box.x, pElem->box.y, pElem->borderWidth, pElem->box.h);
+    pRenderer->FillRect(topRect, pElem->borderColour);
+    pRenderer->FillRect(rightRect, pElem->borderColour);
+    pRenderer->FillRect(bottomRect, pElem->borderColour);
+    pRenderer->FillRect(leftRect, pElem->borderColour);
 }

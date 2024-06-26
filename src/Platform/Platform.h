@@ -37,6 +37,7 @@ namespace Gin::Platform
     void GetWindowSize(Window* pWindow, int& x, int& y);
 
     // Surface
+    Surface* CreateSurface(uint width, uint height);
     Surface* LoadSurface(const char* path);
     void DestroySurface(Surface* pSurface);
 
@@ -45,6 +46,9 @@ namespace Gin::Platform
 
     void GetRGB(const uint32_t& pixel, const PixelFormat* pFormat, uint8_t& r, uint8_t& g, uint8_t& b);
     void GetRGBA(const uint32_t& pixel, const PixelFormat* pFormat, uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a);
+
+    void BlitSurface(Surface* pSrc, Rect* pSrcRect, Surface* pDst, Rect* pDstRect);
+    void BlitScaled(Surface* pSrc, Rect* pSrcRect, Surface* pDst, Rect* pDstRect);
 
     // Renderer
     Renderer* CreateRenderer(Window* pWindow);

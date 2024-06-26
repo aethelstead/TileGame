@@ -17,6 +17,7 @@
 #include "Maths/Vector2.h"
 #include "Maths/Rect.h"
 #include "Rendering/Renderer.h"
+#include "Text/GlyphSheet.h"
 
 namespace Gin
 {
@@ -63,6 +64,8 @@ namespace Gin
         std::vector<std::shared_ptr<VGui::View>> m_activeViews;
 
         Platform::TTFont* m_pFont;
+
+        GlyphSheet m_glyphSheet;
 
     public:
         GameApp()
