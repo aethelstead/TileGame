@@ -50,7 +50,7 @@ namespace Gin::Platform
     Renderer* CreateRenderer(Window* pWindow);
     void DestroyRenderer(Renderer* pRenderer);
     void RenderClear(Renderer* pRenderer);
-    void RenderCopy(Renderer* pRenderer, Texture* pTexture, const Rect& src, const Rect& dest, double angle = 0.0, int flip = 0);
+    void RenderCopy(Renderer* pRenderer, Texture* pTexture, const Rect* pSrc, const Rect* pDest, double angle = 0.0, int flip = 0);
     void RenderPresent(Renderer* pRenderer);
     void SetRenderDrawColour(Renderer* pRenderer, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
     void RenderDrawPoint(Renderer* pRenderer, int& px, int& py);

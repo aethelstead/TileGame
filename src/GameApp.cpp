@@ -64,12 +64,10 @@ bool GameApp::Init()
     }
 
     // Init text
+    m_pFont = Platform::OpenFont("assets/font/arial_bold.ttf", 16);
+    if (!m_pFont)
     {
-        m_pFont = Platform::OpenFont("assets/font/arial_bold.ttf", 18);
-        if (!m_pFont)
-        {
-            LOGWARN("GameApp::Init() - Failed to open font: 'assets/font/arial_bold.ttf'");
-        }
+        LOGWARN("GameApp::Init() - Failed to open font: 'assets/font/arial_bold.ttf'");
     }
 
     m_viewRect = Recti(0, 0, XRES_INTERNAL, YRES_INTERNAL);
@@ -428,11 +426,11 @@ void GameApp::Render()
         {   
             pView->Render(m_pRenderer);
         }*/
-
         
     SDL_SetRenderTarget(m_pRenderer->GetContext()->GetInternal(), nullptr);
     Recti dest(0, 0, m_pWindow->Width(), m_pWindow->Height());
     m_pRenderer->Copy(m_renderTexture, m_viewRect, dest);
+
     m_pRenderer->Present();
 }
 

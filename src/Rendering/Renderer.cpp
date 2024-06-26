@@ -36,6 +36,23 @@ void Renderer::Clear(const Colour4i colour)
     Platform::RenderClear(m_pContext->GetInternal());
 }
 
+void Renderer::Copy(const std::unique_ptr<Texture>& pTexture)
+{
+    Platform::RenderCopy(m_pContext->GetInternal(), pTexture->GetInternal(), nullptr, nullptr);
+}
+
+void Renderer::Copy(const std::unique_ptr<Texture>& pTexture, const Recti& dest)
+{
+    Platform::Rect destRect = { 
+        .x = dest.x,
+        .y = dest.y,
+        .w = dest.w,
+        .h = dest.h
+    };
+
+    Platform::RenderCopy(m_pContext->GetInternal(), pTexture->GetInternal(), nullptr, &destRect);
+}
+
 void Renderer::Copy(const std::unique_ptr<Texture>& pTexture, const Recti& src, const Recti& dest)
 {
     Platform::Rect srcRect = { 
@@ -52,7 +69,7 @@ void Renderer::Copy(const std::unique_ptr<Texture>& pTexture, const Recti& src, 
         .h = dest.h
     };
 
-    Platform::RenderCopy(m_pContext->GetInternal(), pTexture->GetInternal(), srcRect, destRect);
+    Platform::RenderCopy(m_pContext->GetInternal(), pTexture->GetInternal(), &srcRect, &destRect);
 }
 
 void Renderer::Present()

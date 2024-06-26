@@ -17,9 +17,9 @@ void Gin::Platform::RenderClear(Renderer* pRenderer)
     SDL_RenderClear(pRenderer);
 }
 
-void Gin::Platform::RenderCopy(Renderer* pRenderer, Texture* pTexture, const Rect& src, const Rect& dest, double angle, int flip)
+void Gin::Platform::RenderCopy(Renderer* pRenderer, Texture* pTexture, const Rect* pSrc, const Rect* pDest, double angle, int flip)
 {
-    SDL_RenderCopyEx(pRenderer, pTexture, &src, &dest, angle, NULL, (SDL_RendererFlip)flip);
+    SDL_RenderCopyEx(pRenderer, pTexture, pSrc, pDest, angle, NULL, (SDL_RendererFlip)flip);
 }
 
 void Gin::Platform::RenderPresent(Renderer* pRenderer)

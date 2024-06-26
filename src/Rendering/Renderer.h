@@ -27,6 +27,8 @@ namespace Gin
 
         void Clear(const Colour4i colour = Colour4i::Black());
 
+        void Copy(const std::unique_ptr<Texture>& pTexture);
+        void Copy(const std::unique_ptr<Texture>& pTexture, const Recti& dest);
         void Copy(const std::unique_ptr<Texture>& pTexture, const Recti& src, const Recti& dest);
 
         void Present();
