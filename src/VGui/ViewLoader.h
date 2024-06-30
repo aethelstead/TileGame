@@ -15,13 +15,11 @@ namespace Gin::VGui
     private:
         Recti m_viewRect;
         const std::unique_ptr<Renderer>& m_pRenderer;
-        Platform::TTFont* m_pFont;
 
     public:
-        ViewLoader(const Recti& viewRect, const std::unique_ptr<Renderer>& pRenderer, Platform::TTFont* pFont)
+        ViewLoader(const Recti& viewRect, const std::unique_ptr<Renderer>& pRenderer)
             : m_viewRect( viewRect )
             , m_pRenderer( pRenderer )
-            , m_pFont( pFont )
         {}
 
         std::unique_ptr<View> LoadView(const std::string& xmlPath);

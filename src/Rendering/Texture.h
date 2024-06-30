@@ -6,6 +6,7 @@
 
 #include "../Platform/Platform.h"
 #include "RenderContext.h"
+#include "Colour.h"
 
 namespace Gin
 {
@@ -24,6 +25,8 @@ namespace Gin
         Platform::Texture* m_pInternalTexture = nullptr;
 
     public:
+        Colour4i m_colourMod = Colour4i::White();
+
         Texture()
         {}
 
@@ -38,6 +41,8 @@ namespace Gin
         uint Height() const { return m_height; }
 
         Platform::Texture* GetInternal() const { return m_pInternalTexture; }
+
+        bool IsRGBAModded() const { return (m_colourMod != Colour4i::White()); }
     };
 }
 

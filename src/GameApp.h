@@ -41,8 +41,11 @@ namespace Gin
         bool m_running = false;
         bool m_paused = false;
         bool m_vsync = false;
+
+
         uint m_targetFPS = 0;
         uint m_fps = 0;
+        uint m_frameCount = 0;
 
         Recti m_viewRect;
 
@@ -63,19 +66,10 @@ namespace Gin
         std::unordered_map<GameViewType, std::shared_ptr<VGui::View>> m_viewMap;
         std::vector<std::shared_ptr<VGui::View>> m_activeViews;
 
-        Platform::TTFont* m_pFont;
-
         GlyphSheet m_glyphSheet;
 
     public:
         GameApp()
-        {}
-
-        GameApp(const GameApp&) = delete;
-
-	    GameApp(GameApp&&) = delete;
-
-        ~GameApp()
         {}
 
         bool Init();
@@ -107,6 +101,8 @@ namespace Gin
         void UpdateAnimations(double dt);
 
         void Render();
+        void RenderDebugOverlay();
+        void RenderText(std::string_view text, GlyphSheet& glypsheet, const Vector2i& pos, Colour4i colour = Colour4i::White());
     };
 }
 

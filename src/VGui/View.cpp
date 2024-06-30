@@ -35,11 +35,9 @@ void View::RenderElement(const std::shared_ptr<VGui::Element>& pElem, const std:
         const auto pTextBox = dynamic_cast<TextBox*>(pElem.get());
         pRenderer->DrawRect(pTextBox->box, Colour4i::Black());
 
-        if (pTextBox->pTexture)
+        if (!pTextBox->text.empty())
         {
-            Recti src(0, 0, pTextBox->pTexture->Width(), pTextBox->pTexture->Height());
-            Recti dst(pTextBox->box.x, pTextBox->box.y, pTextBox->pTexture->Width(), pTextBox->pTexture->Height());
-            pRenderer->Copy(pTextBox->pTexture, src, dst);
+            
         }
     }
 }

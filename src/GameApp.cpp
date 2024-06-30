@@ -13,11 +13,7 @@
 constexpr uint XRES_INTERNAL = 640;
 constexpr uint YRES_INTERNAL = 360;
 
-constexpr char* CHARSET = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-
 using namespace Gin;
-
-
 
 bool GameApp::Init()
 {
@@ -67,14 +63,7 @@ bool GameApp::Init()
         LOGINFO("GameApp::Init() - Created Platform Renderer.");
     }
 
-    // Init text
-    m_pFont = Platform::OpenFont("assets/font/arial_bold.ttf", 16);
-    if (!m_pFont)
-    {
-        LOGWARN("GameApp::Init() - Failed to open font: 'assets/font/arial_bold.ttf'");
-    }
-
-    m_glyphSheet.Load(m_pRenderer, "assets/font/arial_bold.ttf", 16);
+    m_glyphSheet.Load(m_pRenderer, "assets/font/calibrib.ttf", 16);
 
     m_viewRect = Recti(0, 0, XRES_INTERNAL, YRES_INTERNAL);
 
@@ -89,7 +78,7 @@ bool GameApp::Init()
     // Init menus
     {
         Recti screenRect(0, 0, m_pWindow->Width(), m_pWindow->Height());
-        VGui::ViewLoader viewLoader(screenRect, m_pRenderer, m_pFont);
+        VGui::ViewLoader viewLoader(screenRect, m_pRenderer);
 
         // @TODO: Error checking LoadMenu
         // Add all of the required menus to the menu map
@@ -435,11 +424,84 @@ void GameApp::Render()
     {   
         pView->Render(m_pRenderer);
     }
-
-    Recti sheetRect(0, 0, 160, 160);
-    m_pRenderer->Copy(m_glyphSheet.m_pTexture, sheetRect);
+    
+    RenderDebugOverlay();
 
     m_pRenderer->Present();
+}
+
+void GameApp::RenderDebugOverlay()
+{
+    // Render FPS
+    {
+        std::stringstream ss;
+        ss << "FPS = " << m_fps; 
+        std::string s = ss.str().c_str();
+    
+        Vector2i pos(10, 30);
+        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+    }
+    // Render frame counter
+    {
+        std::stringstream ss;
+        ss << "Frame Count = " << m_frameCount; 
+        std::string s = ss.str().c_str();
+    
+        Vector2i pos(10, 10);
+        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+    }
+    // Render World info
+    {
+        std::stringstream ss;
+        ss << "nEntities = " << m_state.m_entities.size(); 
+        std::string s = ss.str().c_str();
+    
+        Vector2i pos(10, 50);
+        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+    }
+    // Render World info
+    {
+        std::stringstream ss;
+        ss << "PlayerWorld = (" << m_state.m_pPlayer->pos.x << ", " << m_state.m_pPlayer->pos.y << ")"; 
+        std::string s = ss.str().c_str();
+    
+        Vector2i pos(10, 70);
+        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+    }
+}
+
+void GameApp::RenderText(std::string_view text, GlyphSheet& glypsheet, const Vector2i& pos, Colour4i colour)
+{
+    glypsheet.m_pTexture->m_colourMod = colour;
+
+    int ASCII_START = static_cast<int>(' ');
+
+    uint idx = 0;
+    Recti src(0, 0, glypsheet.m_fontSize, glypsheet.m_fontSize);
+    Recti dst(pos.x, pos.y, glypsheet.m_fontSize, glypsheet.m_fontSize);
+    for (const auto& ch : text)
+    {
+        int cellIdx = (ch - ASCII_START);
+        int cellX = (cellIdx % glypsheet.m_cellsPerRow) * glypsheet.m_fontSize;
+        int cellY = (cellIdx / glypsheet.m_cellsPerRow) * glypsheet.m_fontSize;
+        src.x = cellX;
+        src.y = cellY;
+        src.w = glypsheet.m_fontSize;
+        src.h = glypsheet.m_fontSize;
+
+        int glyphAdvance = 0;
+        if (idx > 0)
+        {
+            char prev = text.at(idx - 1);
+            glyphAdvance = glypsheet.GetGlyphAdvance(prev);
+        }
+        dst.x += glyphAdvance;
+        dst.w = glypsheet.m_fontSize;
+        dst.h = glypsheet.m_fontSize;
+
+        m_pRenderer->Copy(glypsheet.m_pTexture, src, dst);
+        ++idx;
+    }
 }
 
 void GameApp::Loop()
@@ -457,7 +519,7 @@ void GameApp::Loop()
 
         HandlePlatformEvents();
         Update(dt);
-
+        
         Render();
         uint64_t currTicks = Platform::Ticks64();
 
@@ -471,6 +533,14 @@ void GameApp::Loop()
             delta = MAX_DELTA - delta;
 
             Platform::Sleep(delta);
+        }
+        m_frameCount++;
+
+        const uint ONE_SEC = 1000;
+        if (currTicks > ONE_SEC)
+        {
+            auto secsPassed = (currTicks / ONE_SEC);
+            m_fps = m_frameCount / secsPassed;
         }
 
         dt = delta;

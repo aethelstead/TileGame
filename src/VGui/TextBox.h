@@ -11,7 +11,6 @@ namespace Gin::VGui
     struct TextBox : public Element
     {
         std::string text;
-        std::unique_ptr<Texture> pTexture = nullptr;
 
         TextBox()
         {}

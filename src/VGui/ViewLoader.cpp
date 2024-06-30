@@ -66,7 +66,7 @@ void ViewLoader::ParseElementTree(const tinyxml2::XMLElement* pXmlElem, const Re
         pElem->FromXML(pXmlElem, parentBox);
 
         auto pTextBox = dynamic_cast<TextBox*>(pElem.get());
-        pTextBox->pTexture = m_pRenderer->PreRenderText(m_pFont, pTextBox->text.c_str(), pTextBox->box);
+        pTextBox->text = pXmlElem->GetText();
     }
 
     if (!pElem)

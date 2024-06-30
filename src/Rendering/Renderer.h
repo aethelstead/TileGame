@@ -37,10 +37,9 @@ namespace Gin
 
         void FillRect(const Recti& rect, const Colour4i colour = Colour4i::White());
 
-        std::unique_ptr<Texture> PreRenderText(Platform::TTFont* pFont, const char* text, Recti box, Colour4i colour = Colour4i::White());
-
     private:
         void SetDrawColour(const Colour4i& colour);
+        void SetTextureRGBAMod(const std::unique_ptr<Texture>& pTexture);
     };
 }
 

@@ -17,7 +17,7 @@ std::unique_ptr<Renderer> Renderer::Create(const std::unique_ptr<Window>& pWindo
         LOGINFO("Renderer::Create() - Vsync was enabled.");
     }
 
-    /// Enable alpha blending
+    // Enable alpha blending
     SDL_SetRenderDrawBlendMode(pRenderer->GetContext()->GetInternal(), SDL_BLENDMODE_BLEND);
 
     const auto pWindowSurface = SDL_GetWindowSurface(pWindow->GetInternal());
@@ -38,11 +38,21 @@ void Renderer::Clear(const Colour4i colour)
 
 void Renderer::Copy(const std::unique_ptr<Texture>& pTexture)
 {
+    if (pTexture->IsRGBAModded())
+    {
+        SetTextureRGBAMod(pTexture);
+    }
+
     Platform::RenderCopy(m_pContext->GetInternal(), pTexture->GetInternal(), nullptr, nullptr);
 }
 
 void Renderer::Copy(const std::unique_ptr<Texture>& pTexture, const Recti& dest)
 {
+    if (pTexture->IsRGBAModded())
+    {
+        SetTextureRGBAMod(pTexture);
+    }
+
     Platform::Rect destRect = { 
         .x = dest.x,
         .y = dest.y,
@@ -55,6 +65,11 @@ void Renderer::Copy(const std::unique_ptr<Texture>& pTexture, const Recti& dest)
 
 void Renderer::Copy(const std::unique_ptr<Texture>& pTexture, const Recti& src, const Recti& dest)
 {
+    if (pTexture->IsRGBAModded())
+    {
+        SetTextureRGBAMod(pTexture);
+    }
+
     Platform::Rect srcRect = { 
         .x = src.x,
         .y = src.y,
@@ -108,30 +123,13 @@ void Renderer::FillRect(const Recti& rect, const Colour4i colour)
     Platform::RenderFillRect(m_pContext->GetInternal(), r);
 }
 
-std::unique_ptr<Texture> Renderer::PreRenderText(Platform::TTFont* pFont, const char* text, Recti box, Colour4i colour)
-{
-    Platform::Rect r = { 
-        .x = box.x,
-        .y = box.y,
-        .w = box.w,
-        .h = box.h
-    };
-
-    Platform::Colour c = {
-        .r = colour.m_r,
-        .g = colour.m_g,
-        .b = colour.m_b,
-        .a = colour.m_a
-    };
-
-    auto pSurface = Platform::RenderText(pFont, text, c);
-    auto pTexture = Texture::Create(pSurface, GetContext());
-    Platform::DestroySurface(pSurface);
-    
-    return pTexture;
-}
-
 void Renderer::SetDrawColour(const Colour4i& colour)
 {
     Platform::SetRenderDrawColour(m_pContext->GetInternal(), colour.m_r, colour.m_g, colour.m_b, colour.m_a);
+}
+
+void Renderer::SetTextureRGBAMod(const std::unique_ptr<Texture>& pTexture)
+{
+    Platform::SetTextureColourMod(pTexture->GetInternal(), pTexture->m_colourMod.m_r, pTexture->m_colourMod.m_g, pTexture->m_colourMod.m_b);
+    Platform::SetTextureAlphaMod(pTexture->GetInternal(), pTexture->m_colourMod.m_a);
 }

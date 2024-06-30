@@ -19,3 +19,13 @@ void Gin::Platform::DestroyTexture(Texture* pTexture)
 {
     SDL_DestroyTexture(pTexture);
 }
+
+void Gin::Platform::SetTextureColourMod(Texture* texture, uint8_t r, uint8_t g, uint8_t b)
+{
+    SDL_SetTextureColorMod(texture, r, g, b);
+}
+
+void Gin::Platform::SetTextureAlphaMod(Texture* texture, uint8_t a)
+{
+    SDL_SetTextureAlphaMod(texture, a);
+}

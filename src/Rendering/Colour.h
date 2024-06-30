@@ -36,6 +36,16 @@ namespace Gin
             , m_a( a )
         {}
 
+        bool operator==(const Colour4i& c) const
+        {
+            return (this->m_r == c.m_r && this->m_g == c.m_g && this->m_b == c.m_b && this->m_a == c.m_a);
+        }
+
+        bool operator!=(const Colour4i& c) const
+        {
+            return (this->m_r != c.m_r || this->m_g != c.m_g || this->m_b != c.m_b || this->m_a != c.m_a);
+        }
+
         void FromInt32(uint32_t n);
         uint32_t ToInt32();
 

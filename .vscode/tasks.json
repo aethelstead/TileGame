@@ -18,6 +18,7 @@
                 "${workspaceFolder}/src/Platform/SDL2/*.cpp",
                 "${workspaceFolder}/src/Rendering/*.cpp",
                 "${workspaceFolder}/src/Utilities/*.cpp",
+                "${workspaceFolder}/src/Text/*.cpp",
                 "${workspaceFolder}/src/VGui/*.cpp",
                 "${workspaceFolder}/src/Tiled/tmx/*.cpp",
                 "-lSDL2",
