@@ -11,6 +11,9 @@ namespace Gin::VGui
     class View : public Element
     {
     public:
+        static std::unique_ptr<View> Create(std::string_view xmlPath, const Recti& viewRect, const std::unique_ptr<Renderer>& pRenderer);
+
+    public:
         View()
         {}
 

@@ -35,11 +35,12 @@ namespace Gin
             : Entity( uid, tilesetId, pos, width, height, zIdx )
         {
             type = EntityType::Player;
-            speed = 3;
+            speed = 2;
             animId = static_cast<uint>(PlayerAnimationType::IdleSouth);
             ready = true;
         }
 
+        // @TODO: get rid of this method
         void GetRidOfMe() override {}
     };
 }

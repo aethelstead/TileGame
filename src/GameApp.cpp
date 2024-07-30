@@ -62,8 +62,8 @@ bool GameApp::Init()
         }
         LOGINFO("GameApp::Init() - Created Platform Renderer.");
     }
-
-    m_glyphSheet.Load(m_pRenderer, "assets/font/calibrib.ttf", 16);
+    
+    InitText();
 
     m_viewRect = Recti(0, 0, XRES_INTERNAL, YRES_INTERNAL);
 
@@ -78,18 +78,17 @@ bool GameApp::Init()
     // Init menus
     {
         Recti screenRect(0, 0, m_pWindow->Width(), m_pWindow->Height());
-        VGui::ViewLoader viewLoader(screenRect, m_pRenderer);
 
         // @TODO: Error checking LoadMenu
         // Add all of the required menus to the menu map
-        m_viewMap[ GameViewType::Main ] = viewLoader.LoadView("assets/menu/main.xml");
-        m_viewMap[ GameViewType::Save ] = viewLoader.LoadView("assets/menu/save.xml");
-        m_viewMap[ GameViewType::Load ] = viewLoader.LoadView("assets/menu/load.xml");
-        m_viewMap[ GameViewType::Settings ] = viewLoader.LoadView("assets/menu/settings.xml");
-        m_viewMap[ GameViewType::Equipment ] = viewLoader.LoadView("assets/menu/equipment.xml");
-        m_viewMap[ GameViewType::Inventory ] = viewLoader.LoadView("assets/menu/inventory.xml");
-        m_viewMap[ GameViewType::Map ] = viewLoader.LoadView("assets/menu/map.xml");
-        m_viewMap[ GameViewType::Stats ] = viewLoader.LoadView("assets/menu/stats.xml");
+        m_viewMap[ GameViewType::Main ] = VGui::View::Create("assets/menu/main.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Save ] = VGui::View::Create("assets/menu/save.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Load ] = VGui::View::Create("assets/menu/load.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Settings ] = VGui::View::Create("assets/menu/settings.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Equipment ] = VGui::View::Create("assets/menu/equipment.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Inventory ] = VGui::View::Create("assets/menu/inventory.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Map ] = VGui::View::Create("assets/menu/map.xml", screenRect, m_pRenderer);
+        m_viewMap[ GameViewType::Stats ] = VGui::View::Create("assets/menu/stats.xml", screenRect, m_pRenderer);
     }
 
     m_state.Init(m_viewRect.w, m_viewRect.h);
@@ -118,6 +117,147 @@ bool GameApp::Init()
 
     LOGINFO("GameApp::Init() - Initialisation successful.");
 
+    return true;
+}
+
+bool GameApp::InitText()
+{
+    if (!m_pRenderer)
+    {
+        LOGERROR("GameApp::InitText() - Failed to init text. Renderer was NULL.");
+        return false;
+    }
+
+    // Arial 16
+    {
+        const std::string fontPath = "assets/font/arial.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::Arial16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // ArialBold 16
+    {
+        const std::string fontPath = "assets/font/arialbd.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::ArialBold16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // Calibri 16
+    {
+        const std::string fontPath = "assets/font/calibri.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::Calibri16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // CalibriBold 16
+    {
+        const std::string fontPath = "assets/font/calibrib.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::CalibriBold16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // Consolas 16
+    {
+        const std::string fontPath = "assets/font/consola.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::Consolas16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // ConsolasBold 16
+    {
+        const std::string fontPath = "assets/font/consolab.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::ConsolasBold16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // Verdana 16
+    {
+        const std::string fontPath = "assets/font/verdana.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::Verdana16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // VerdanaBold 16
+    {
+        const std::string fontPath = "assets/font/verdanab.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::VerdanaBold16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // Times 16
+    {
+        const std::string fontPath = "assets/font/times.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::Times16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+
+    // TimesBold 16
+    {
+        const std::string fontPath = "assets/font/timesbd.ttf";
+        auto pGlyphsheet = GlyphSheet::Create(fontPath, 16, *m_pRenderer);
+        if (pGlyphsheet)
+        {
+            LOGINFO("GameApp::InitText() - Created GlypSheet for font at: '" << fontPath << "'.");
+            m_glyphsheetMap.try_emplace(GameFontType::TimesBold16, std::move(pGlyphsheet));
+        }
+        else
+            LOGWARN("GameApp::InitText() - Failed to create Glyphsheet for font at: '" << fontPath << "'. Any text using this font may not be shown.");
+    }
+    
     return true;
 }
 
@@ -432,15 +572,6 @@ void GameApp::Render()
 
 void GameApp::RenderDebugOverlay()
 {
-    // Render FPS
-    {
-        std::stringstream ss;
-        ss << "FPS = " << m_fps; 
-        std::string s = ss.str().c_str();
-    
-        Vector2i pos(10, 30);
-        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
-    }
     // Render frame counter
     {
         std::stringstream ss;
@@ -448,16 +579,31 @@ void GameApp::RenderDebugOverlay()
         std::string s = ss.str().c_str();
     
         Vector2i pos(10, 10);
-        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Black());
+        pos.x+=1;pos.y+=1;
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Yellow());
+    }
+    // Render FPS
+    {
+        std::stringstream ss;
+        ss << "FPS = " << m_fps; 
+        std::string s = ss.str().c_str();
+    
+        Vector2i pos(10, 30);
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Black());
+        pos.x+=1;pos.y+=1;
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Yellow());
     }
     // Render World info
     {
         std::stringstream ss;
-        ss << "nEntities = " << m_state.m_entities.size(); 
+        ss << "EntityCount = " << m_state.m_entities.size(); 
         std::string s = ss.str().c_str();
     
         Vector2i pos(10, 50);
-        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Black());
+        pos.x+=1;pos.y+=1;
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Yellow());
     }
     // Render World info
     {
@@ -466,7 +612,9 @@ void GameApp::RenderDebugOverlay()
         std::string s = ss.str().c_str();
     
         Vector2i pos(10, 70);
-        RenderText(s, m_glyphSheet, pos, Colour4i::Yellow());
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Black());
+        pos.x+=1;pos.y+=1;
+        RenderText(s, *m_glyphsheetMap[GameFontType::ArialBold16], pos, Colour4i::Yellow());
     }
 }
 
@@ -485,9 +633,7 @@ void GameApp::RenderText(std::string_view text, GlyphSheet& glypsheet, const Vec
         int cellX = (cellIdx % glypsheet.m_cellsPerRow) * glypsheet.m_fontSize;
         int cellY = (cellIdx / glypsheet.m_cellsPerRow) * glypsheet.m_fontSize;
         src.x = cellX;
-        src.y = cellY;
-        src.w = glypsheet.m_fontSize;
-        src.h = glypsheet.m_fontSize;
+        src.y = cellY + 2;
 
         int glyphAdvance = 0;
         if (idx > 0)
@@ -496,8 +642,6 @@ void GameApp::RenderText(std::string_view text, GlyphSheet& glypsheet, const Vec
             glyphAdvance = glypsheet.GetGlyphAdvance(prev);
         }
         dst.x += glyphAdvance;
-        dst.w = glypsheet.m_fontSize;
-        dst.h = glypsheet.m_fontSize;
 
         m_pRenderer->Copy(glypsheet.m_pTexture, src, dst);
         ++idx;

@@ -35,6 +35,20 @@ namespace Gin
         Count
     };
 
+    enum class GameFontType : uint
+    {
+        Arial16,
+        ArialBold16,
+        Calibri16,
+        CalibriBold16,
+        Consolas16,
+        ConsolasBold16,
+        Verdana16,
+        VerdanaBold16,
+        Times16,
+        TimesBold16
+    };
+
     class GameApp
     {
     private:
@@ -66,7 +80,7 @@ namespace Gin
         std::unordered_map<GameViewType, std::shared_ptr<VGui::View>> m_viewMap;
         std::vector<std::shared_ptr<VGui::View>> m_activeViews;
 
-        GlyphSheet m_glyphSheet;
+        std::unordered_map<GameFontType, std::unique_ptr<GlyphSheet>> m_glyphsheetMap;
 
     public:
         GameApp()
@@ -79,6 +93,8 @@ namespace Gin
         void Loop();
 
     private:
+
+        bool InitText();
 
         bool LoadGameMap(const std::string& mapName, Tiled::Map& tiledMap);
 

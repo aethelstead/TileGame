@@ -10,8 +10,12 @@
 
 namespace Gin
 {
-    struct GlyphSheet
+    class GlyphSheet
     {
+    public:
+        static std::unique_ptr<GlyphSheet> Create(std::string_view fontPath, uint ptSize, Renderer& renderer);
+
+    //private:
         std::unique_ptr<Texture> m_pTexture;
         Platform::TTFont* m_pFont;
         uint m_fontSize = 0;
@@ -20,12 +24,13 @@ namespace Gin
         uint m_nCells = 0;
         uint m_cellsPerRow = 0;
 
+    public:
         GlyphSheet()
         {}
 
-        int GetGlyphAdvance(const char& ch);
+        GlyphSheet(uint ptSize);
 
-        bool Load(const std::unique_ptr<Renderer>& pRenderer, std::string_view ttfPath, uint fontSize);
+        int GetGlyphAdvance(const char& ch);
     };
 }
 
